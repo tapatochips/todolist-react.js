@@ -16,6 +16,7 @@ function Cart({ cart, removeFromCart, user }) {
     for (let item of cart) {
       let price = item.price;
       total += price;
+      
     }
     return total.toFixed(2);
   };
@@ -33,8 +34,29 @@ function Cart({ cart, removeFromCart, user }) {
   };
 
   const generateInputTags = () => {
-    return Object.keys(cart).map(key => (key==='size'? <></>: <input key={`input_${key}`} name={cart[key].default_price} defaultValue={cart[key].qty} hidden />))
+    return getUniqueCart(cart).map(item => (<input key={`input_${item.id}`} name={item.product_name} defaultValue={`${item.image}, ${item.price}, ${getQuantity(item, cart)}`} hidden />))
   };
+
+  const getUniqueCart = (cart) => {
+    const uniqueCart = []
+    const id = new Set();
+    for (let item of cart){
+        if (!id.has(item.id)){
+            uniqueCart.push(item)
+            id.add(item.id)
+        }
+    }
+    return uniqueCart
+};
+ const getQuantity = (target, cart) => {
+    let count = 0
+    for (let item of cart){
+        if (item.id === target.id){
+            count ++
+        }
+    }
+    return count
+}
 
   return (
     <div className="cart">
@@ -58,7 +80,7 @@ function Cart({ cart, removeFromCart, user }) {
             </ul>
             <div>Total: ${getTotal()}</div>
           </div>
-          <form action="http://127.0.0.1:5000/api/create-checkout-session" method="POST">
+          <form action="http://127.0.0.1:5000/api/checkout" method="POST">
           {generateInputTags()}
             <button type="submit">Checkout</button>
           </form>
